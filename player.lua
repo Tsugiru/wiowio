@@ -9,7 +9,7 @@ player.height = 32
 
 player.animation = animation(
   love.graphics.newImage("resources/characters.png"),
-  player.width, 
+  player.width,
   player.height,
   --[[row]] 0,
   --[[start_column]] 0,
