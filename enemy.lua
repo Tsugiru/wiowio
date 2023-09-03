@@ -3,20 +3,21 @@ local animation = require("animation")
 
 local enemy = entity.new()
 
-enemy.width = 32
-enemy.height = 32
-
-enemy.animation = animation(
-  love.graphics.newImage("resources/characters.png"),
-  enemy.width,
-  enemy.height,
-  --[[row]] 1,
-  --[[start_column]] 0,
-  --[[end_column]] 4,
-  --[[duration]] 1)
+function enemy.new(x_, y_)
+  local self = {x = x_, y = y_, width = 32, height = 32}
+  self.animation = animation(
+    love.graphics.newImage("resources/characters.png"),
+    self.width,
+    self.height,
+    --[[row]] 1,
+    --[[start_column]] 0,
+    --[[end_column]] 4,
+    --[[duration]] 1)
+  setmetatable(self, {__index = enemy})
+  return self
+end
 
 function enemy:draw()
-  print(self.x, self.y)
   self.animation:draw(
     self.x - self.width / 2,
     self.y - self.height / 2)

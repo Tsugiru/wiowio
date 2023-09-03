@@ -1,5 +1,5 @@
 local player = require("player")
-local enemy = require("enemy")
+local coordinator = require("enemy_coordinator")
 
 function normalize_vector(v)
   local magnitude = math.sqrt(v.x * v.x + v.y * v.y)
@@ -13,28 +13,36 @@ function scale_vector(v, a)
 end
 
 local physics = {
-  meter = 32
+  meter = 32,
+  enemy_velocity = 32.,
+  player_velocity = 64.,
 }
+
+function physics:update_enemy(dt)
+  for _, enemy in ipairs(coordinator.enemies) do
+    local enemy_velocity_vector = {
+      x = player.x - enemy.x,
+      y = player.y - enemy.y,
+    }
+    normalize_vector(enemy_velocity_vector)
+    scale_vector(enemy_velocity_vector, self.enemy_velocity)
+    enemy.x = enemy.x + enemy_velocity_vector.x * dt
+    enemy.y = enemy.y + enemy_velocity_vector.y * dt
+  end
+end
 
 function physics:update(dt)
   -- update player
-  local player_velocity = 64.
-  if player.direction.x ~= 0 and player.direction.y ~= 0 then
-    player_velocity = player_velocity / math.sqrt(2)
-  end
-  player.x = player.x + player.direction.x * player_velocity * dt
-  player.y = player.y + player.direction.y * player_velocity * dt
-
-  -- update enemy
-  local enemy_velocity = 32.
-  local enemy_direction = {
-    x = player.x - enemy.x,
-    y = player.y - enemy.y
+  local player_velocity_vector = {
+    x = player.direction.x,
+    y = player.direction.y,
   }
-  normalize_vector(enemy_direction)
-  scale_vector(enemy_direction, enemy_velocity)
-  enemy.x = enemy.x + enemy_direction.x * dt
-  enemy.y = enemy.y + enemy_direction.y * dt
+  normalize_vector(player_velocity_vector)
+  scale_vector(player_velocity_vector, self.player_velocity)
+  player.x = player.x + player_velocity_vector.x * dt
+  player.y = player.y + player_velocity_vector.y * dt
+
+  self:update_enemy(dt)
 end
 
 return physics
