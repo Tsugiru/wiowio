@@ -1,48 +1,55 @@
 local player = require("player")
-local coordinator = require("enemy_coordinator")
-
-function normalize_vector(v)
-  local magnitude = math.sqrt(v.x * v.x + v.y * v.y)
-  v.x = (magnitude ~= 0) and v.x / magnitude or 0
-  v.y = (magnitude ~= 0) and v.y / magnitude or 0
-end
-
-function scale_vector(v, a)
-  v.x = a * v.x
-  v.y = a * v.y
-end
+local enemy_coordinator = require("enemy_coordinator")
+local bullet_coordinator = require("bullet_coordinator")
+local geometry = require("geometry_utils")
 
 local physics = {
   meter = 32,
   enemy_velocity = 32.,
   player_velocity = 64.,
+  bullet_velocity = 160.,
 }
 
-function physics:update_enemy(dt)
-  for _, enemy in ipairs(coordinator.enemies) do
-    local enemy_velocity_vector = {
+function physics:update_enemies(dt)
+  for _, enemy in ipairs(enemy_coordinator.enemies) do
+    local enemy_velocity_vector =
+    geometry.modify_magnitude({
       x = player.x - enemy.x,
       y = player.y - enemy.y,
-    }
-    normalize_vector(enemy_velocity_vector)
-    scale_vector(enemy_velocity_vector, self.enemy_velocity)
+    },
+      self.enemy_velocity)
+
     enemy.x = enemy.x + enemy_velocity_vector.x * dt
     enemy.y = enemy.y + enemy_velocity_vector.y * dt
   end
 end
 
-function physics:update(dt)
+function physics:update_player(dt)
   -- update player
-  local player_velocity_vector = {
+  local player_velocity_vector = geometry.modify_magnitude({
     x = player.direction.x,
     y = player.direction.y,
-  }
-  normalize_vector(player_velocity_vector)
-  scale_vector(player_velocity_vector, self.player_velocity)
+  },
+    self.player_velocity)
+
   player.x = player.x + player_velocity_vector.x * dt
   player.y = player.y + player_velocity_vector.y * dt
+end
 
-  self:update_enemy(dt)
+function physics:update_bullets(dt)
+  for _, bullet in ipairs(bullet_coordinator.bullets) do
+    local bullet_velocity_vector = geometry.modify_magnitude(
+      bullet.direction, self.bullet_velocity)
+
+    bullet.x = bullet.x + bullet_velocity_vector.x * dt
+    bullet.y = bullet.y + bullet_velocity_vector.y * dt
+  end
+end
+
+function physics:update(dt)
+  self:update_player(dt)
+  self:update_enemies(dt)
+  self:update_bullets(dt)
 end
 
 return physics
