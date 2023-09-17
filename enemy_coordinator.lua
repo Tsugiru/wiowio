@@ -4,14 +4,8 @@ local player = require("player")
 local coordinator = {}
 
 coordinator.time_since_last_spawn = 0
-coordinator.spawn_interval = 1
+coordinator.spawn_interval = 0.5
 coordinator.enemies = {}
-
-function coordinator.new()
-  local self = {}
-  setmetatable(self, {__index = enemy})
-  return self
-end
 
 function coordinator:update(dt)
   -- TODO: make it work for dt greater than 1.0
