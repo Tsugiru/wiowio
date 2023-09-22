@@ -11,7 +11,7 @@ local physics = {
 }
 
 function physics:update_enemies(dt)
-  for _, enemy in ipairs(enemy_coordinator.enemies) do
+  for _, enemy in pairs(enemy_coordinator.enemies) do
     local enemy_velocity_vector =
     geometry.modify_magnitude({
       x = player.x - enemy.x,
@@ -24,7 +24,6 @@ function physics:update_enemies(dt)
 end
 
 function physics:update_player(dt)
-  -- update player
   local player_velocity_vector = geometry.modify_magnitude({
     x = player.direction.x,
     y = player.direction.y,
@@ -35,7 +34,7 @@ function physics:update_player(dt)
 end
 
 function physics:update_bullets(dt)
-  for _, bullet in ipairs(bullet_coordinator.bullets) do
+  for _, bullet in pairs(bullet_coordinator.bullets) do
     local bullet_velocity_vector = geometry.modify_magnitude(
       bullet.direction, self.bullet_velocity)
 
@@ -63,11 +62,24 @@ function physics:resolve_collision(entity1, entity2)
 end
 
 function physics:resolve_collisions()
-  for i = 1, #enemy_coordinator.enemies - 1 do
-    for j = i + 1, #enemy_coordinator.enemies do
-      self:resolve_collision(
-        enemy_coordinator.enemies[i],
-        enemy_coordinator.enemies[j])
+  for _, enemy1 in pairs(enemy_coordinator.enemies) do
+    for _, enemy2 in pairs(enemy_coordinator.enemies) do
+      if enemy1 ~= enemy2 then
+        self:resolve_collision(enemy1, enemy2)
+      end
+    end
+  end
+
+  for _, bullet in pairs(bullet_coordinator.bullets) do
+    for id, enemy in pairs (enemy_coordinator.enemies) do
+      local intersect = geometry.circle_rectangle_intersection(
+        { center = { x = bullet.x, y = bullet.y }, radius = bullet.radius },
+        enemy)
+
+      if #intersect ~= 0 then
+        -- We have intersection.
+        enemy_coordinator:remove_enemy(id)
+      end
     end
   end
 end
@@ -77,9 +89,6 @@ function physics:update(dt)
   self:update_enemies(dt)
   self:update_bullets(dt)
 
-  -- Here, call order matters. It's important to call `resolve_collisions` after having updated
-  -- the positions of all of the entities, since we rely on `entity.last_x` and `entity.last_y`,
-  -- which start off as initially nil for new entities.
   self:resolve_collisions()
 end
 

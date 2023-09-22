@@ -9,10 +9,10 @@ function love.draw()
   camera:setPosition(player.x, player.y)
   camera:set()
   love.graphics.rectangle("fill", 0, 0, 32, 32)
-  for _, enemy in ipairs(enemy_coordinator.enemies) do
+  for _, enemy in pairs(enemy_coordinator.enemies) do
     enemy:draw()
   end
-  for _, bullet in ipairs(bullet_coordinator.bullets) do
+  for _, bullet in pairs(bullet_coordinator.bullets) do
     bullet:draw()
   end
   player:draw()
@@ -22,7 +22,7 @@ end
 function love.update(dt)
   player:update(dt)
   enemy_coordinator:update(dt)
-  for _, enemy in ipairs(enemy_coordinator.enemies) do
+  for _, enemy in pairs(enemy_coordinator.enemies) do
     enemy:update(dt)
   end
   physics:update(dt)

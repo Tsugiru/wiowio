@@ -3,8 +3,8 @@ local animation = require("animation")
 
 local enemy = entity.new()
 
-function enemy.new(x_, y_)
-  local self = {x = x_, y = y_, width = 32, height = 32}
+function enemy.new(x_, y_, id_)
+  local self = {x = x_, y = y_, width = 32, height = 32, id = id_}
   self.animation = animation(
     love.graphics.newImage("resources/characters.png"),
     self.width,
